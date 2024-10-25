@@ -24,19 +24,13 @@
         </el-form-item>
 
         <el-form-item>
-          <el-select v-model="queryContractBaseDto.auditStatus" clearable placeholder="审核状态">
-                <el-option value="80001" label="未审核"/>
-                <el-option value="80002" label="审核通过"/>
-                <el-option value="80003" label="审核未通过"/>
+          <el-select v-model="queryContractBaseDto.status" clearable placeholder="审计状态">
+                <el-option :value="1" label="未审计"/>
+                <el-option :value="2" label="审计中"/>
+                <el-option :value="3" label="已审计"/>
             </el-select>
         </el-form-item>
 
-        <el-form-item>
-          <el-select v-model="queryContractBaseDto.publishStatus" clearable placeholder="发布状态">
-                <el-option value="90001" label="未发布"/>
-                <el-option value="90002" label="已发布"/>
-            </el-select>
-        </el-form-item>
 
         <!-- //TODO -->
         <!-- <el-form-item label="入驻时间">
@@ -61,22 +55,23 @@
     <el-table :data="list" border stripe>
         <el-table-column 
           label="#"
-          width="50"
+          width="100"
           >
             <template slot-scope="scope">
               {{ (pageNo - 1) * pageSize + scope.$index + 1 }}
             </template>
           </el-table-column>
-        <el-table-column prop="name" label="合约名称" width="150" />
+        <el-table-column prop="name" label="合约名称" width="200" />
+        <!-- <el-table-column prop="contractAdd" label="合约地址" width="200" /> -->
         <!-- <el-table-column prop="companyName" label="公司名称" width="150" /> -->
-        <el-table-column prop="language" label="语言类型" width="150" />
-        <el-table-column prop="platform" label="运行平台" width="150" />
-        <el-table-column prop="description" label="简介" width="400"/>
-        <el-table-column prop="createTime" label="创建时间" width="160" />
+        <el-table-column prop="language" label="语言类型" width="200" />
+        <el-table-column prop="platform" label="运行平台" width="200" />
+        <el-table-column prop="description" label="简介" width="350"/>
+        <!-- <el-table-column prop="createTime" label="创建时间" width="160" /> -->
         <el-table-column
           prop="grade"
           label="合约等级"
-          width="100">
+          width="150">
             <template slot-scope="scope">
               <el-tag
                 v-if="scope.row.grade === 1" type="primary" size="small"
@@ -89,17 +84,11 @@
                 disable-transitions>Hard</el-tag>
             </template>
         </el-table-column>
-        <el-table-column label="审核状态" width="100">
+        <el-table-column label="审计状态" width="150">
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.auditStatus === '80001'" type="success" size="mini">未审核</el-tag>
-              <el-tag v-if="scope.row.auditStatus === '80002'" size="mini">审核通过</el-tag>
-              <el-tag v-if="scope.row.auditStatus === '80003'" size="mini">审核未通过</el-tag>
-            </template>
-        </el-table-column>
-        <el-table-column label="发布状态" width="100">
-            <template slot-scope="scope">
-              <el-tag v-if="scope.row.publishStatus === '90001'" type="success" size="mini">未发布</el-tag>
-              <el-tag v-if="scope.row.publishStatus === '90002'" size="mini">已发布</el-tag>
+              <el-tag v-if="scope.row.status === 1" type="danger" size="mini">未审计</el-tag>
+              <el-tag v-if="scope.row.status === 2" type="warning" size="mini">审计中</el-tag>
+              <el-tag v-if="scope.row.status === 3" type="success" size="mini">已审计</el-tag>
             </template>
         </el-table-column>
         <el-table-column label="操作">
@@ -110,13 +99,20 @@
           @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
         </router-link>
         <el-button
-        size="mini"
-        type="warning"
-        @click="handledownload(scope.$index, scope.row)">下载</el-button>
-        <el-button
           size="mini"
           type="danger"
           @click="removeById(scope.row.id)">删除</el-button>
+          
+          <el-button
+          size="mini"
+          type="success"
+          @click="download(scope.row.id)">下载</el-button>
+
+          <el-button
+          size="mini"
+          type="warning"
+          :disabled="scope.row.status !== 1"
+          @click="detect(scope.row.id)">审计</el-button>
       </template>
     </el-table-column>
 
@@ -147,13 +143,14 @@ export default {
       total: 0, // 总记录数
       pageNo: 1,
       pageSize: 10,
-      queryContractBaseDto: {} // 查询条件表单
+      queryContractBaseDto: {}, // 查询条件表单
     }
   },
 
   created() {
     this.fetchData()
   },
+  
 
   methods: {
     fetchData() {
