@@ -5,14 +5,14 @@ export default {
 
   list() {
     return request({
-      url: 'admin/sb4u/contract/list',
+      url:  '/admin/sb4u/contract/list',
       method: 'get'
     })
   },
 
   pageList(pageNo, pageSize, queryContractBaseDto) {
     return request({
-      url: `/admin/sb4u/contract/listpage/${pageNo}/${pageSize}`,
+      url:  `/admin/sb4u/contract/listpage/${pageNo}/${pageSize}`,
       method: 'get',
       params: queryContractBaseDto
     })
@@ -45,6 +45,13 @@ export default {
       url: '/admin/sb4u/contract/update',
       method: 'put',
       data: contract
+    })
+  },
+
+  getDownloadUrl(id) {
+    return request ({
+      url: 'http://localhost:8120/admin/contract/media-files/download?contractId=' + id,
+      method: 'get',
     })
   }
 

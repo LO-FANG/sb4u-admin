@@ -144,6 +144,7 @@ export default {
       pageNo: 1,
       pageSize: 10,
       queryContractBaseDto: {}, // 查询条件表单
+      
     }
   },
 
@@ -173,6 +174,22 @@ export default {
     resetData() {
         this.queryContractBaseDto = {}
         this.fetchData()
+    },
+    //下载文件
+    download(id) {
+      // 询问是否下载
+      this.$confirm('是否下载该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          //调用后端接口
+          return contractApi.getDownloadUrl(id)
+        }).then(response => {
+          response.data.downloadUrl
+          
+          window.open(response.data.downloadUrl)
+        })
     },
     // 根据id删除
     removeById(id) {
