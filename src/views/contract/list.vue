@@ -47,7 +47,12 @@
         </el-form-item> -->
         <el-form-item>
             <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
-            <el-button type="default" @click="resetData()">清空</el-button>
+            <el-button type="default" icon="el-icon-refresh" @click="resetData()">清空</el-button>
+
+              <router-link :to="'/contract/create'">
+                <el-button style="margin-left: 10px;" type="success" icon="el-icon-plus">添加</el-button>
+              </router-link>
+
         </el-form-item>
     </el-form>
 
@@ -61,12 +66,12 @@
               {{ (pageNo - 1) * pageSize + scope.$index + 1 }}
             </template>
           </el-table-column>
-        <el-table-column prop="name" label="合约名称" width="200" />
+        <el-table-column prop="name" label="合约名称" width="150" />
         <!-- <el-table-column prop="contractAdd" label="合约地址" width="200" /> -->
         <!-- <el-table-column prop="companyName" label="公司名称" width="150" /> -->
-        <el-table-column prop="language" label="语言类型" width="200" />
-        <el-table-column prop="platform" label="运行平台" width="200" />
-        <el-table-column prop="description" label="简介" width="350"/>
+        <el-table-column prop="language" label="语言类型" width="150" />
+        <el-table-column prop="platform" label="运行平台" width="150" />
+        <el-table-column prop="description" label="简介" width="450"/>
         <!-- <el-table-column prop="createTime" label="创建时间" width="160" /> -->
         <el-table-column
           prop="grade"
@@ -92,29 +97,35 @@
             </template>
         </el-table-column>
         <el-table-column label="操作">
-      <template slot-scope="scope">
-        <router-link :to="'/contract/edit/' + scope.row.id">
-          <el-button
-          size="mini"
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-        </router-link>
-        <el-button
-          size="mini"
-          type="danger"
-          @click="removeById(scope.row.id)">删除</el-button>
-          
-          <el-button
-          size="mini"
-          type="success"
-          @click="download(scope.row.id)">下载</el-button>
+          <template slot-scope="scope">
+            <router-link :to="'/contract/edit/' + scope.row.id">
+              <el-button
+              icon="el-icon-edit"
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            </router-link>
+            <el-button
+              icon="el-icon-close"
+              size="mini"
+              type="danger"
+              @click="removeById(scope.row.id)">删除</el-button>
+              
+              <el-button
+              icon="el-icon-download"
+              size="mini"
+              type="success"
+              @click="download(scope.row.id)">下载</el-button>
 
-          <el-button
-          size="mini"
-          type="warning"
-          :disabled="scope.row.status !== 1"
-          @click="detect(scope.row.id)">审计</el-button>
-      </template>
-    </el-table-column>
+              <router-link :to="'/contract/detect/' + scope.row.id">
+                <el-button
+                icon="el-icon-document"
+                size="mini"
+                type="warning"
+                :disabled="scope.row.status !== 1"
+                @click="detect(scope.row.id)">审计</el-button>
+              </router-link>
+          </template>
+        </el-table-column>
 
   </el-table>
   <el-pagination
@@ -160,6 +171,7 @@ export default {
         this.total = response.data.total
       })
     },
+
     // 修改页码 引用调用，系统自动传入
     changeCurrentPage(pageNo) {
       this.pageNo = pageNo;

@@ -53,6 +53,22 @@ export default {
       url: 'http://localhost:8120/admin/contract/media-files/download?contractId=' + id,
       method: 'get',
     })
-  }
+  },
+
+  detectContract(params,id) {
+    // 将 params 序列化为 JSON 字符串
+  const jsonData = JSON.stringify({
+    input: params,
+    id: id
+  });
+    return request ({
+      url: 'http://localhost:5000/predict',
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json' // 设置请求头，指定发送的数据为 JSON 格式
+      },
+      data: jsonData
+    })
+  },
 
 }

@@ -57,8 +57,9 @@
                :file-list="fileList"
                :limit="1"
                action="http://localhost:8120/admin/contract/media-files/upload">
-          <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+          <el-button  slot="trigger" size="small" type="primary">选择文件</el-button>
           <el-button
+                    icon="el-icon-upload"
                     :disabled="uploadBtnDisabled"
                     style="margin-left: 10px;"
                     size="small"
@@ -85,7 +86,7 @@
     data () {
       return {
         // 合约对象
-        contract:{},
+        contract: {},
         saveBtnDisabled: false,  //  默认按钮可用
         // TODO：动态查询数据
         languages: [{
@@ -171,7 +172,7 @@
       // 根据id查询数据
       fetchDataById(id) {
         contractApi.getById(id).then(response => {
-          this.contract = response.data.item
+          this.contract = response.data.data
         })
       },
 

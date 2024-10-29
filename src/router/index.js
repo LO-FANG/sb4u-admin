@@ -55,7 +55,8 @@ export const constantRouterMap = [
         path: 'create',
         name: 'ContractCreate',
         component: () => import('@/views/contract/form'),
-        meta: { title: '添加合约' }
+        meta: { title: '添加合约' },
+        hidden: true
       },
       {
         path: 'edit/:id',
@@ -63,7 +64,14 @@ export const constantRouterMap = [
         component: () => import('@/views/contract/form'),
         meta: { title: '编辑合约' },
         hidden: true
-      }
+      },
+      {
+        path: 'detect/:id',
+        name: 'ContractDetect',
+        component: () => import('@/views/contract/detect'),
+        meta: { title: '审计合约' },
+        hidden: true
+      },
     ]
   },
 
