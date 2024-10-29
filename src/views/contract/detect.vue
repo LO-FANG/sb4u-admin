@@ -12,7 +12,7 @@
         <el-step title="审计完成"></el-step>
       </el-steps>
 
-      <div v-if="activeStep === 0"  class="transfer-container" style="margin: 10px 0 20px"  >
+      <div v-if="activeStep === 1"  class="transfer-container" style="margin: 10px 0 20px"  >
         <h3 style="text-align: center; margin: 10px 0 20px">选择漏洞类型</h3>
             <div style="text-align: center; margin: 10px 0 20px">
                 <el-transfer
@@ -51,6 +51,50 @@
 
       <div v-if="activeStep === 3"  class="transfer-container" style="margin: 10px 0 20px"  >
         <h3 style="text-align: center; margin: 10px 0 20px">您的合约审计完成</h3>
+
+
+        <el-table :data="detectRes"  border stripe>
+            <el-table-column prop="filename" label="合约名称" width="150" />
+            <el-table-column prop="pc" label="程序计数器" width="150" />
+            <el-table-column prop="opcode" label="操作码" width="150" />
+            <el-table-column prop="type" label="漏洞类型" width="150" />
+            <el-table-column prop="tool" label="检测工具" width="150" />
+            <el-table-column prop="code_coverage" label="代码覆盖率" width="150" />
+            <el-table-column prop="execution_time" label="执行时间" width="150" />
+        </el-table>
+        <!-- 查询表单
+        <el-form :inline="true">
+            <el-form-item>
+                <el-input v-model="detectRes.filename" placeholder="合约名称"/>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="detectRes.pc" placeholder="程序计数器"/>
+            </el-form-item>
+
+            
+            <el-form-item>
+                <el-input v-model="detectRes.opcode" placeholder="操作码"/>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="detectRes.type" placeholder="漏洞类型"/>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="detectRes.tool" placeholder="检测工具"/>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="detectRes.code_coverage" placeholder="代码覆盖率"/>
+            </el-form-item>
+
+            <el-form-item>
+                <el-input v-model="detectRes.execution_time" placeholder="执行时间"/>
+            </el-form-item>
+        </el-form> -->
+
+
       </div>
 
     </div>
@@ -104,7 +148,7 @@
           { url: require('../assets/homeImages/3.png') }
         ],
 
-        activeStep: 0,
+        activeStep: 1,
 
         data: generateData(),
         value3: [1],
@@ -114,9 +158,12 @@
         },
 
         currentText: '', // 当前显示的文本
-        fullText: '您的合约正在审计中，请耐心等待...', // 完整的文本
+        // fullText: '您的合约正在审计中，请耐心等待...', // 完整的文本
+        fullText: '我们不生产代码，我们只是代码的搬运工', // 完整的文本
         typingInterval: null, // 定时器
         currentIndex: 0, // 当前字符的索引
+        detectRes: {},  // 检测结果
+        filename: "" // 文件名
 
       };
 
@@ -133,8 +180,8 @@
         },
         
         startTyping() {
-            console.log("--------------打字机启动--------------")
-            this.typingInterval = setInterval(this.type, 300); // 每100毫秒添加一个字符
+            // console.log("--------------打字机启动--------------")
+            this.typingInterval = setInterval(this.type, 300); // 每300毫秒添加一个字符
         },
         type() {
             if (this.currentIndex < this.fullText.length) {
@@ -151,6 +198,7 @@
         },
 
         handleSubmit() {
+            
             this.activeStep = 2;
             // 构造请求数据
             this.createCodeRain();
@@ -161,10 +209,14 @@
             });
 
             // 发送请求到后端
-            contractApi.detectContract(requestData, this.$route.params.id)
+            contractApi.detectContract(requestData, this.$route.params.fileId)
             .then(response => {
+                // console.log(this.$route.params.fileId)
                 // 处理响应
-                console.log(response);
+                this.activeStep = 3;
+                console.log(response.data.res);
+                this.detectRes = response.data.res
+                this.filename = response.filename
                 
                 
             })
@@ -177,7 +229,7 @@
 
         createCodeRain() {
 
-            console.log("code rain code rain............")
+            // console.log("code rain code rain............")
 
             this.$nextTick(() => { // 确保 DOM 已经更新  
                 const canvas = this.$refs.canvas;  
@@ -194,7 +246,7 @@
                         drops.push(0);  
                     }  
             
-                    const str = "智能 合约 正在 审计";  
+                    const str = "智能 合约 正在审计";  
                     const draw = () => { 
                         context.fillStyle = "rgba(255,255,255,0.05)";  
                         context.fillRect(0, 0, W, H);  
@@ -243,7 +295,7 @@
     #message {
         display: inline-block; /* 确保在同一行 */
         position: relative; /* 相对定位 */
-        color: #00cc33; /* 根据背景调整颜色 */
+        color: 	#008000; /* 根据背景调整颜色 */
         margin: 0; /* 移除默认外边距 */
         padding: 5px; /* 根据需要添加内边距 */
         z-index: 10; /* 确保文本在画布上方 */
@@ -256,10 +308,9 @@
         display: inline-block; /* 确保在同一行 */
         width: 10px; /* 光标宽度 */
         height: 1.2em; /* 光标高度 */
-        background-color: #00cc33; /* 光标颜色 */
+        background-color: 	#008000; /* 光标颜色 */
         animation: blink 1s infinite; /* 应用闪烁动画 */
         vertical-align: text-bottom; /* 确保光标与文本对齐 */
-        margin-left: 2px; /* 给光标和文本之间留点空隙 */
     }    
 
     .typing {

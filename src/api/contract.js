@@ -55,11 +55,11 @@ export default {
     })
   },
 
-  detectContract(params,id) {
+  detectContract(params, fileId) {
     // 将 params 序列化为 JSON 字符串
   const jsonData = JSON.stringify({
-    input: params,
-    id: id
+    bugType: params,
+    fileId: fileId
   });
     return request ({
       url: 'http://localhost:5000/predict',

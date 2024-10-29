@@ -116,13 +116,12 @@
               type="success"
               @click="download(scope.row.id)">下载</el-button>
 
-              <router-link :to="'/contract/detect/' + scope.row.id">
+              <router-link :to="'/contract/detect/' + scope.row.fileId">
                 <el-button
                 icon="el-icon-document"
                 size="mini"
                 type="warning"
-                :disabled="scope.row.status !== 1"
-                @click="detect(scope.row.id)">审计</el-button>
+                :disabled="scope.row.status !== 1">审计</el-button>
               </router-link>
           </template>
         </el-table-column>

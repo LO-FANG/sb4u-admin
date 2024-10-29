@@ -66,7 +66,7 @@ export const constantRouterMap = [
         hidden: true
       },
       {
-        path: 'detect/:id',
+        path: 'detect/:fileId',
         name: 'ContractDetect',
         component: () => import('@/views/contract/detect'),
         meta: { title: '审计合约' },
