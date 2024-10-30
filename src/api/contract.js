@@ -55,19 +55,63 @@ export default {
     })
   },
 
+  getDetectFileDownloadUrl(id) {
+    console.log()
+    return request ({
+      url: 'http://localhost:8120/admin/contract/media-files/downloaddetectfile?id=' + id,
+      method: 'get',
+    })
+  },
+
   detectContract(params, fileId) {
     // 将 params 序列化为 JSON 字符串
-  const jsonData = JSON.stringify({
-    bugType: params,
-    fileId: fileId
-  });
+    const jsonData = JSON.stringify({
+      toolType: params,
+      fileId: fileId
+    });
     return request ({
       url: 'http://localhost:5000/predict',
       method: 'post',
+      timeout: 15000, // 设置超时时间为15000毫秒（15秒）
       headers: {
         'Content-Type': 'application/json' // 设置请求头，指定发送的数据为 JSON 格式
       },
       data: jsonData
+    })
+  },
+
+  saveDetectResultFile(uploadFileParamsDto) {
+    return request({
+      url: 'http://localhost:8120/admin/contract/media-files/savemediainfo',
+      method: 'post',
+      timeout: 15000, // 设置超时时间为15000毫秒（15秒）
+      headers: {
+        'Content-Type': 'application/json' // 设置请求头，指定发送的数据为 JSON 格式
+      },
+      data: uploadFileParamsDto
+    })
+  },
+
+
+  saveDetectResult(id, DetectResultList, detectFileId) {
+    //console.log("jjjjjjjjjjjj:" + detectFileId)
+    // 遍历列表，为每个元素添加 resultId 属性
+    DetectResultList.forEach((item) => {
+      item.resultId = detectFileId;
+    });
+    return request({
+      url: `admin/contract/detect-result/save/${id}`,
+      method: 'post',
+      data: DetectResultList
+    })
+  },
+
+
+  detectResPageList(pageNo, pageSize, queryDetectResultDto) {
+    return request({
+      url:  `admin/contract/detect-result/listpage/${pageNo}/${pageSize}`,
+      method: 'get',
+      params: queryDetectResultDto
     })
   },
 

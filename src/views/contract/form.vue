@@ -46,7 +46,7 @@
 
         <!-- 文件上传：TODO -->
         
-        <!-- 上传视频 -->
+        <!-- 上传文件 -->
         <el-form-item label="上传合约文件">
           <el-upload
                ref="upload"

@@ -121,7 +121,7 @@
                 icon="el-icon-document"
                 size="mini"
                 type="warning"
-                :disabled="scope.row.status !== 1">审计</el-button>
+                >审计</el-button>
               </router-link>
           </template>
         </el-table-column>

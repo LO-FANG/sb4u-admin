@@ -7,13 +7,13 @@
       </el-carousel>
   
       <el-steps :active="activeStep" finish-status="success" simple style="margin-top: 10px">
-        <el-step title="选择漏洞类型"></el-step>
+        <el-step title="请选择智能合约审计工具"></el-step>
         <el-step title="审计中"></el-step>
         <el-step title="审计完成"></el-step>
       </el-steps>
 
       <div v-if="activeStep === 1"  class="transfer-container" style="margin: 10px 0 20px"  >
-        <h3 style="text-align: center; margin: 10px 0 20px">选择漏洞类型</h3>
+        <h3 style="text-align: center; margin: 10px 0 20px">选择智能合约审计工具</h3>
             <div style="text-align: center; margin: 10px 0 20px">
                 <el-transfer
                 style="text-align: left; display: inline-block"
@@ -21,7 +21,7 @@
                 filterable
                 :left-default-checked="[2, 3]"
                 :right-default-checked="[1]"
-                :titles="['漏洞类型', '已选择']"
+                :titles="['工具列表', '已选择']"
                 :button-texts="['取消', '选择']"
                 :format="{
                     noChecked: '${total}',
@@ -30,7 +30,8 @@
                 @change="handleChange"
                 :data="data">
                 <span slot-scope="{ option }">{{ option.key }} - {{ option.label }}</span>
-                <el-button class="transfer-footer" slot="right-footer" size="medium" @click="handleSubmit">确定</el-button>
+                <el-button type="primary" class="transfer-footer" slot="right-footer" size="medium" @click="handleSubmit">审计</el-button>
+                <el-button type="success" class="transfer-footer" slot="right-footer" size="medium" @click="handleCheckHis">查询以往结果</el-button>
                 </el-transfer>
             </div>
 
@@ -50,53 +51,59 @@
       </div>
 
       <div v-if="activeStep === 3"  class="transfer-container" style="margin: 10px 0 20px"  >
-        <h3 style="text-align: center; margin: 10px 0 20px">您的合约审计完成</h3>
+        <h3 style="text-align: center; margin: 10px 0 20px">合约审计结果</h3>
+        <!--查询表单-->
+        <el-form :inline="true">
+            <el-form-item>
+                <el-input v-model="queryDetectResultDto.tool" placeholder="检测工具"/>
+            </el-form-item>
+            <el-form-item>
+                <el-input v-model="queryDetectResultDto.type" placeholder="漏洞类型"/>
+            </el-form-item>
 
+            <el-form-item>
+                <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
+                <el-button type="default" icon="el-icon-refresh" @click="resetData()">清空</el-button>
+            </el-form-item>
+        </el-form>
 
-        <el-table :data="detectRes"  border stripe>
-            <el-table-column prop="filename" label="合约名称" width="150" />
+        <el-table :data="detectResList"  border stripe>
+            <el-table-column label="#" width="80">
+                <template slot-scope="scope">
+                {{ (pageNo - 1) * pageSize + scope.$index + 1 }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="contractName" label="合约名称" width="200" />
             <el-table-column prop="pc" label="程序计数器" width="150" />
             <el-table-column prop="opcode" label="操作码" width="150" />
             <el-table-column prop="type" label="漏洞类型" width="150" />
             <el-table-column prop="tool" label="检测工具" width="150" />
-            <el-table-column prop="code_coverage" label="代码覆盖率" width="150" />
-            <el-table-column prop="execution_time" label="执行时间" width="150" />
+            <el-table-column prop="codeCoverage" label="代码覆盖率(%)" width="150" />
+            <el-table-column prop="executionTime" label="执行时间(s)" width="200"/>
+            <el-table-column prop="createTime" label="检测时间" width="170"/>
+
+            <el-table-column label="操作">
+                <template slot-scope="scope">
+                    <el-button
+                        icon="el-icon-download"
+                        size="mini"
+                        type="success"
+                        @click="download(scope.row.resultId)">下载合约审计报告</el-button>
+                </template>
+            </el-table-column>
         </el-table>
-        <!-- 查询表单
-        <el-form :inline="true">
-            <el-form-item>
-                <el-input v-model="detectRes.filename" placeholder="合约名称"/>
-            </el-form-item>
-
-            <el-form-item>
-                <el-input v-model="detectRes.pc" placeholder="程序计数器"/>
-            </el-form-item>
-
-            
-            <el-form-item>
-                <el-input v-model="detectRes.opcode" placeholder="操作码"/>
-            </el-form-item>
-
-            <el-form-item>
-                <el-input v-model="detectRes.type" placeholder="漏洞类型"/>
-            </el-form-item>
-
-            <el-form-item>
-                <el-input v-model="detectRes.tool" placeholder="检测工具"/>
-            </el-form-item>
-
-            <el-form-item>
-                <el-input v-model="detectRes.code_coverage" placeholder="代码覆盖率"/>
-            </el-form-item>
-
-            <el-form-item>
-                <el-input v-model="detectRes.execution_time" placeholder="执行时间"/>
-            </el-form-item>
-        </el-form> -->
-
-
+        <el-pagination
+            background
+            style="padding: 30px 0; text-align: center;"
+            layout="prev, pager, next, sizes, jumper, ->, total"
+            :current-page="pageNo"
+            :page-size="pageSize"
+            :page-sizes="[10,15,20,30]"
+            :total="total"
+            @current-change="changeCurrentPage"
+            @size-change="changePageSize">
+        </el-pagination>
       </div>
-
     </div>
 
 
@@ -117,23 +124,23 @@
           data.push(
             {
                 key: 1,
-                label: '可重入漏洞',
+                label: 'Osiris',
             },
             {
                 key: 2,
-                label: '访问控制漏洞',
+                label: 'Oyente',
             },
             {
                 key: 3,
-                label: '算术漏洞',
+                label: 'Mythril',
             },
             {
                 key: 4,
-                label: '抢跑漏洞',
+                label: 'Sguard',
             },
             {
                 key: 5,
-                label: '短地址攻击',
+                label: 'Smartshield',
             },
 
         );
@@ -158,20 +165,73 @@
         },
 
         currentText: '', // 当前显示的文本
-        // fullText: '您的合约正在审计中，请耐心等待...', // 完整的文本
-        fullText: '我们不生产代码，我们只是代码的搬运工', // 完整的文本
+        fullText: '智能合约正在审计中，请耐心等待...', // 完整的文本
+        //fullText: '我们不生产代码，我们只是代码的搬运工', // 完整的文本
         typingInterval: null, // 定时器
         currentIndex: 0, // 当前字符的索引
-        detectRes: {},  // 检测结果
-        filename: "" // 文件名
+        detectRes: [],  // 检测结果
+        uploadFileParamsDto: {}, // 文件信息保存
+        detectResList: [], // 检测结果列表
+        total: 0, // 总记录数
+        pageNo: 1,
+        pageSize: 10,
+        queryDetectResultDto: {}, // 查询条件表单
+        detectFileId: ''
 
       };
 
     },
 
     methods: {
+
+        //下载文件
+        download(id) {
+            console.log("下载############：   " + id)
+        // 询问是否下载
+        this.$confirm('是否下载该文件, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+            }).then(() => {
+            //调用后端接口
+            return contractApi.getDetectFileDownloadUrl(id)
+            }).then(response => {
+            console.log("urllllll:  " + response.data.downloadUrl)
+            
+            window.open(response.data.downloadUrl)
+            })
+        },
+
+        fetchData() {
+            contractApi.detectResPageList(this.pageNo, this.pageSize, this.queryDetectResultDto).then(response => {
+                this.detectResList = response.data.rows,
+                this.total = response.data.total
+            })
+        },
+        // 修改页码 引用调用，系统自动传入
+        changeCurrentPage(pageNo) {
+            this.pageNo = pageNo;
+            this.fetchData();
+        },
+        // 改变每页记录数
+        changePageSize(pageSize) {
+            this.pageSize = pageSize;
+            this.fetchData();
+        },
+        // 重置表单
+        resetData() {
+            this.queryDetectResultDto = {}
+            this.queryDetectResultDto.resultId = this.$route.params.fileId
+            this.fetchData()
+        },
         handleChange(value, direction, movedKeys) {
             console.log(value, direction, movedKeys);
+        },
+
+        handleCheckHis() {
+            this.activeStep = 3
+            this.queryDetectResultDto.resultId = this.$route.params.fileId
+            this.fetchData()
         },
 
         resetText() {
@@ -211,18 +271,48 @@
             // 发送请求到后端
             contractApi.detectContract(requestData, this.$route.params.fileId)
             .then(response => {
-                // console.log(this.$route.params.fileId)
-                // 处理响应
-                this.activeStep = 3;
-                console.log(response.data.res);
                 this.detectRes = response.data.res
-                this.filename = response.filename
                 
+                this.uploadFileParamsDto = response.data.uploadFileParamsDto
+
+                let uploadFileParamsObj;
+                try {
+                uploadFileParamsObj = JSON.parse(response.data.uploadFileParamsDto);
+                } catch (error) {
+                console.error("解析 JSON 出错:", error);
+                }
+
+                if (uploadFileParamsObj) {
+                    this.detectFileId = uploadFileParamsObj.id;
+                }
+                
+                contractApi.saveDetectResultFile(this.uploadFileParamsDto).then(response => {
+                    
+                    console.log("检测结果文件上传成功")
+                    
+                    contractApi.saveDetectResult(this.$route.params.fileId, this.detectRes, this.detectFileId).then(response => {
+                        console.log(response)
+                        this.queryDetectResultDto.resultId = this.$route.params.fileId
+                        contractApi.detectResPageList(this.pageNo, this.pageSize, this.queryDetectResultDto).then(response =>{
+                            this.detectResList = response.data.rows,
+                            console.log("这是结果列表：" + this.detectResList)
+                            this.total = response.data.total
+                        }).catch(error => {
+                            console.error('获取数据失败:', error);
+                            });
+                        this.activeStep = 3;
+                        console.log("为啥呀？？？  " + this.activeStep)
+                    })
+                }).catch(error => {
+                    console.log(response.message)
+                    
+                })
                 
             })
             .catch(error => {
                 // 处理错误
                 console.error(error);
+                this.$router.push({ path: '/contract' });
             });
         },
 
@@ -362,7 +452,7 @@
     }
 
     .transfer-footer {
-        margin-left: 40%;
+        margin-left: 13%;
         padding: 5px 5px;
     }
 

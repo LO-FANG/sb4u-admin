@@ -37,6 +37,8 @@ export const constantRouterMap = [
     }]
   },
 
+
+
   // 合约管理
   {
     path: '/contract',
@@ -74,6 +76,23 @@ export const constantRouterMap = [
       },
     ]
   },
+
+    // 审计结果管理
+    {
+      path: '/detect',
+      component: Layout,
+      redirect: '/detect/list',
+      name: 'Detect',
+      meta: { title: '审计结果管理' },
+      children: [
+        {
+          path: 'list',
+          name: 'DetectList',
+          component: () => import('@/views/detect/list'),
+          meta: { title: '审计结果列表' }
+        },
+      ]
+    },
 
   { path: '*', redirect: '/404', hidden: true }
 ]
