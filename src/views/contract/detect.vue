@@ -5,34 +5,36 @@
           <img  style="width:100%; height:100%" :src="image.url" alt="Image" />
         </el-carousel-item>
       </el-carousel>
-  
-      <el-steps :active="activeStep" finish-status="success" simple style="margin-top: 10px">
-        <el-step title="请选择智能合约审计工具"></el-step>
-        <el-step title="审计中"></el-step>
-        <el-step title="审计完成"></el-step>
-      </el-steps>
+      
+        <el-steps :active="activeStep" finish-status="success" simple style="margin-top: 10px">
+            <el-step title="请选择智能合约审计工具"></el-step>
+            <el-step title="审计中"></el-step>
+            <el-step title="审计完成"></el-step>
+        </el-steps>
+      
 
       <div v-if="activeStep === 1"  class="transfer-container" style="margin: 10px 0 20px"  >
         <h3 style="text-align: center; margin: 10px 0 20px">选择智能合约审计工具</h3>
             <div style="text-align: center; margin: 10px 0 20px">
                 <el-transfer
-                style="text-align: left; display: inline-block"
-                v-model="value4"
-                filterable
-                :left-default-checked="[2, 3]"
-                :right-default-checked="[1]"
-                :titles="['工具列表', '已选择']"
-                :button-texts="['取消', '选择']"
-                :format="{
-                    noChecked: '${total}',
-                    hasChecked: '${checked}/${total}'
-                }"
-                @change="handleChange"
-                :data="data">
+                    style="text-align: left; display: inline-block;"
+                    v-model="value4"
+                    filterable
+                    :left-default-checked="[2, 3]"
+                    :right-default-checked="[1]"
+                    :titles="['工具列表', '已选择']"
+                    :button-texts="['取消', '选择']"
+                    :format="{
+                        noChecked: '${total}',
+                        hasChecked: '${checked}/${total}'
+                    }"
+                    @change="handleChange"
+                    :data="data">
                 <span slot-scope="{ option }">{{ option.key }} - {{ option.label }}</span>
                 <el-button type="primary" class="transfer-footer" slot="right-footer" size="medium" @click="handleSubmit">审计</el-button>
-                <el-button type="success" class="transfer-footer" slot="right-footer" size="medium" @click="handleCheckHis">查询以往结果</el-button>
-                </el-transfer>
+                <el-button type="success" class="transfer-footer" slot="right-footer" size="medium" @click="handleCheckHis">历史结果</el-button>
+                <el-button type="default" class="transfer-footer" slot="right-footer" @click="goBack()">取消</el-button>    
+            </el-transfer>
             </div>
 
       </div>
@@ -54,6 +56,10 @@
         <h3 style="text-align: center; margin: 10px 0 20px">合约审计结果</h3>
         <!--查询表单-->
         <el-form :inline="true">
+
+            <el-form-item>
+                <el-button type="default" icon="el-icon-arrow-left" @click="goBack()"></el-button>
+            </el-form-item>
             <el-form-item>
                 <el-input v-model="queryDetectResultDto.tool" placeholder="检测工具"/>
             </el-form-item>
@@ -65,19 +71,25 @@
                 <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
                 <el-button type="default" icon="el-icon-refresh" @click="resetData()">清空</el-button>
             </el-form-item>
-        </el-form>
+            </el-form>
 
-        <el-table :data="detectResList"  border stripe>
+
+
+            <el-table :data="detectResList"  border stripe>
             <el-table-column label="#" width="80">
                 <template slot-scope="scope">
                 {{ (pageNo - 1) * pageSize + scope.$index + 1 }}
                 </template>
             </el-table-column>
             <el-table-column prop="contractName" label="合约名称" width="200" />
-            <el-table-column prop="pc" label="程序计数器" width="150" />
-            <el-table-column prop="opcode" label="操作码" width="150" />
-            <el-table-column prop="type" label="漏洞类型" width="150" />
-            <el-table-column prop="tool" label="检测工具" width="150" />
+            <el-table-column prop="pc" label="程序计数器" width="120" />
+            <el-table-column label="操作码" width="150">
+                <template slot-scope="scope">
+                    {{ scope.row.opcode || 'None' }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="type" label="漏洞类型" width="120" />
+            <el-table-column prop="tool" label="检测工具" width="120" />
             <el-table-column prop="codeCoverage" label="代码覆盖率(%)" width="150" />
             <el-table-column prop="executionTime" label="执行时间(s)" width="200"/>
             <el-table-column prop="createTime" label="检测时间" width="170"/>
@@ -89,20 +101,25 @@
                         size="mini"
                         type="success"
                         @click="download(scope.row.resultId)">下载合约审计报告</el-button>
+                    <el-button
+                        size="mini"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="deleteDetectRes(scope.row.id)">删除</el-button>
                 </template>
             </el-table-column>
-        </el-table>
-        <el-pagination
-            background
-            style="padding: 30px 0; text-align: center;"
-            layout="prev, pager, next, sizes, jumper, ->, total"
-            :current-page="pageNo"
-            :page-size="pageSize"
-            :page-sizes="[10,15,20,30]"
-            :total="total"
-            @current-change="changeCurrentPage"
-            @size-change="changePageSize">
-        </el-pagination>
+            </el-table>
+            <el-pagination
+                background
+                style="padding: 30px 0; text-align: center;"
+                layout="prev, pager, next, sizes, jumper, ->, total"
+                :current-page="pageNo"
+                :page-size="pageSize"
+                :page-sizes="[10,15,20,30]"
+                :total="total"
+                @current-change="changeCurrentPage"
+                @size-change="changePageSize">
+            </el-pagination>
       </div>
     </div>
 
@@ -134,15 +151,6 @@
                 key: 3,
                 label: 'Mythril',
             },
-            {
-                key: 4,
-                label: 'Sguard',
-            },
-            {
-                key: 5,
-                label: 'Smartshield',
-            },
-
         );
 
         return data;
@@ -184,6 +192,39 @@
 
     methods: {
 
+        deleteDetectRes(id) {
+            // 询问是否删除
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+                }).then(() => {
+                //调用后端接口
+                return contractApi.removeDetectRecordAndFile(id)
+                }).then(response => {
+                    //刷新页面
+                    this.fetchData()
+                    // 弹出成功提示
+                    this.$notify({
+                    title: '成功',
+                    message: response.message,
+                    type: 'success'
+                    });
+                })
+                .catch((err) => {
+                if(err === 'cancel') {
+                    this.$notify({
+                    type: 'info',
+                    message: '已取消删除'
+                });   
+                }       
+                });
+        },
+
+        goBack() {
+            this.$router.go(-1) 
+        },
+
         //下载文件
         download(id) {
             console.log("下载############：   " + id)
@@ -193,8 +234,8 @@
             cancelButtonText: '取消',
             type: 'warning'
             }).then(() => {
-            //调用后端接口
-            return contractApi.getDetectFileDownloadUrl(id)
+                //调用后端接口
+                return contractApi.getDetectFileDownloadUrl(id)
             }).then(response => {
             console.log("urllllll:  " + response.data.downloadUrl)
             
@@ -272,9 +313,7 @@
             contractApi.detectContract(requestData, this.$route.params.fileId)
             .then(response => {
                 this.detectRes = response.data.res
-                
                 this.uploadFileParamsDto = response.data.uploadFileParamsDto
-
                 let uploadFileParamsObj;
                 try {
                 uploadFileParamsObj = JSON.parse(response.data.uploadFileParamsDto);
@@ -288,25 +327,25 @@
                 
                 contractApi.saveDetectResultFile(this.uploadFileParamsDto).then(response => {
                     
-                    console.log("检测结果文件上传成功")
-                    
-                    contractApi.saveDetectResult(this.$route.params.fileId, this.detectRes, this.detectFileId).then(response => {
-                        console.log(response)
-                        this.queryDetectResultDto.resultId = this.$route.params.fileId
-                        contractApi.detectResPageList(this.pageNo, this.pageSize, this.queryDetectResultDto).then(response =>{
-                            this.detectResList = response.data.rows,
-                            console.log("这是结果列表：" + this.detectResList)
-                            this.total = response.data.total
-                        }).catch(error => {
-                            console.error('获取数据失败:', error);
-                            });
-                        this.activeStep = 3;
-                        console.log("为啥呀？？？  " + this.activeStep)
-                    })
-                }).catch(error => {
-                    console.log(response.message)
-                    
+                console.log("检测结果文件上传成功")
+                
+                contractApi.saveDetectResult(this.$route.params.fileId, this.detectRes, this.detectFileId).then(response => {
+                    console.log(response)
+                    this.queryDetectResultDto.resultId = this.$route.params.fileId
+                    contractApi.detectResPageList(this.pageNo, this.pageSize, this.queryDetectResultDto).then(response =>{
+                        this.detectResList = response.data.rows,
+                        console.log("这是结果列表：" + this.detectResList)
+                        this.total = response.data.total
+                    }).catch(error => {
+                        console.error('获取数据失败:', error);
+                        });
+                    this.activeStep = 3;
+                    console.log("为啥呀？？？  " + this.activeStep)
                 })
+            }).catch(error => {
+                console.log(response.message)
+                
+            })
                 
             })
             .catch(error => {
@@ -369,10 +408,13 @@
         clearInterval(this.typingInterval); // 组件销毁时清除定时器
     },
 
+
+
   };
   </script>
   
   <style>
+  
 
     .typing-container {
         position: absolute;
@@ -452,7 +494,7 @@
     }
 
     .transfer-footer {
-        margin-left: 13%;
+        margin-left: 7%;
         padding: 5px 5px;
     }
 

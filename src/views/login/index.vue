@@ -108,7 +108,7 @@ $light_gray:#eee;
 
 /* reset element-ui css */
 .login-container {
-  background-image: url('https://w.wallhaven.cc/full/5g/wallhaven-5g9ed8.png');
+  background-image: url('../assets/background/bg.png');
   .el-input {
     display: inline-block;
     height: 47px;

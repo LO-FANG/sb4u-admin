@@ -44,29 +44,30 @@
             </el-select>
         </el-form-item>   
 
-        <!-- 文件上传：TODO -->
         
-        <!-- 上传文件 -->
-        <el-form-item label="上传合约文件">
+        <el-form-item label="合约文件">
           <el-upload
-               ref="upload"
-               :auto-upload="false"
-               :on-success="handleUploadSuccess"
-               :on-error="handleUploadError"
-               :on-exceed="handleUploadExceed"
-               :file-list="fileList"
-               :limit="1"
-               action="http://localhost:8120/admin/contract/media-files/upload">
-          <el-button  slot="trigger" size="small" type="primary">选择文件</el-button>
-          <el-button
-                    icon="el-icon-upload"
-                    :disabled="uploadBtnDisabled"
-                    style="margin-left: 10px;"
-                    size="small"
-                    type="success"
-                    @click="submitUpload()">上传</el-button>
+            ref="upload"
+            :auto-upload="false"
+            :on-success="handleUploadSuccess"
+            :on-error="handleUploadError"
+            :on-exceed="handleUploadExceed"
+            :file-list="fileList"
+            :limit="1"
+            action="http://localhost:8130/minio/upload">
+            <el-button slot="trigger" size="small" type="primary">选择文件</el-button>
+            <div slot="tip" style="color: #c0c4cc;" class="el-upload__tip">上传合约Solidity版本不超过0.4.24，且不超过50MB</div>
+            <el-button
+              icon="el-icon-upload"
+              :disabled="uploadBtnDisabled"
+              style="margin-left: 10px;"
+              size="small"
+              type="success"
+              @click="submitUpload">
+              上传
+            </el-button>
           </el-upload>
-      </el-form-item>
+        </el-form-item>
         
 
         <el-form-item label="合约简介">
@@ -74,7 +75,9 @@
         </el-form-item>
         <el-form-item>
             <el-button :disabled="saveBtnDisabled" type="primary" @click="saveOrUpdate()">保存</el-button>
+            <el-button type="default" @click="goBack()">取消</el-button>
         </el-form-item>
+
     </el-form>
   </div>
 </template>
@@ -139,6 +142,11 @@
     },
 
     methods: {
+
+      goBack() {
+            this.$router.go(-1) 
+        },
+
       saveOrUpdate() {
         this.saveBtnDisabled = true
         if(!this.contract.id) {

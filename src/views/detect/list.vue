@@ -3,6 +3,10 @@
 
     <!--查询表单-->
     <el-form :inline="true">
+
+            <el-form-item>
+                <el-button type="default" icon="el-icon-arrow-left" @click="goBack()"></el-button>
+            </el-form-item>
             <el-form-item>
                 <el-input v-model="queryDetectResultDto.tool" placeholder="检测工具"/>
             </el-form-item>
@@ -25,10 +29,14 @@
                 </template>
             </el-table-column>
             <el-table-column prop="contractName" label="合约名称" width="200" />
-            <el-table-column prop="pc" label="程序计数器" width="150" />
-            <el-table-column prop="opcode" label="操作码" width="150" />
-            <el-table-column prop="type" label="漏洞类型" width="150" />
-            <el-table-column prop="tool" label="检测工具" width="150" />
+            <el-table-column prop="pc" label="程序计数器" width="120" />
+            <el-table-column label="操作码" width="150">
+                <template slot-scope="scope">
+                    {{ scope.row.opcode || 'None' }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="type" label="漏洞类型" width="120" />
+            <el-table-column prop="tool" label="检测工具" width="120" />
             <el-table-column prop="codeCoverage" label="代码覆盖率(%)" width="150" />
             <el-table-column prop="executionTime" label="执行时间(s)" width="200"/>
             <el-table-column prop="createTime" label="检测时间" width="170"/>
@@ -40,6 +48,11 @@
                         size="mini"
                         type="success"
                         @click="download(scope.row.resultId)">下载合约审计报告</el-button>
+                    <el-button
+                        size="mini"
+                        type="danger"
+                        icon="el-icon-close"
+                        @click="deleteDetectRes(scope.row.id)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -81,6 +94,41 @@ export default {
   
 
   methods: {
+
+    deleteDetectRes(id) {
+            // 询问是否删除
+            this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+                }).then(() => {
+                //调用后端接口
+                return contractApi.removeDetectRecordAndFile(id)
+                }).then(response => {
+                    //刷新页面
+                    this.fetchData()
+                    // 弹出成功提示
+                    this.$notify({
+                    title: '成功',
+                    message: response.message,
+                    type: 'success'
+                    });
+                })
+                .catch((err) => {
+                if(err === 'cancel') {
+                    this.$notify({
+                    type: 'info',
+                    message: '已取消删除'
+                });   
+                }       
+                });
+        },
+
+
+    goBack() {
+            this.$router.go(-1) 
+        },
+
     //下载文件
     download(id) {
             console.log("下载############：   " + id)

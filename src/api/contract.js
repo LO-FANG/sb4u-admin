@@ -5,14 +5,14 @@ export default {
 
   list() {
     return request({
-      url:  '/admin/sb4u/contract/list',
+      url:  '/contract/list',
       method: 'get'
-    })
+    })   
   },
 
   pageList(pageNo, pageSize, queryContractBaseDto) {
     return request({
-      url:  `/admin/sb4u/contract/listpage/${pageNo}/${pageSize}`,
+      url:  `/contract/listpage/${pageNo}/${pageSize}`,
       method: 'get',
       params: queryContractBaseDto
     })
@@ -20,14 +20,14 @@ export default {
 
   removeById(id) {
     return request({
-      url: `/admin/sb4u/contract/remove/${id}`,
+      url: `/contract/remove/${id}`,
       method: 'delete'
     })
   },
 
   save(contract) {
     return request({
-      url: '/admin/sb4u/contract/save',
+      url: '/contract/save',
       method: 'post',
       data: contract
     })
@@ -35,14 +35,14 @@ export default {
 
   getById(id) {
     return request({
-      url: `/admin/sb4u/contract/get/${id}`,
+      url: `/contract/get/${id}`,
       method: 'get'
     })
   },
 
   updateById(contract) {
     return request({
-      url: '/admin/sb4u/contract/update',
+      url: '/contract/update',
       method: 'put',
       data: contract
     })
@@ -50,7 +50,7 @@ export default {
 
   getDownloadUrl(id) {
     return request ({
-      url: 'http://localhost:8120/admin/contract/media-files/download?contractId=' + id,
+      url: '/minio/download?id=' + id,
       method: 'get',
     })
   },
@@ -58,7 +58,7 @@ export default {
   getDetectFileDownloadUrl(id) {
     console.log()
     return request ({
-      url: 'http://localhost:8120/admin/contract/media-files/downloaddetectfile?id=' + id,
+      url: 'minio/downloaddetectfile?id=' + id,
       method: 'get',
     })
   },
@@ -72,7 +72,7 @@ export default {
     return request ({
       url: 'http://localhost:5000/predict',
       method: 'post',
-      timeout: 15000, // 设置超时时间为15000毫秒（15秒）
+      timeout: 120000, // 设置超时时间为120000毫秒（120秒）
       headers: {
         'Content-Type': 'application/json' // 设置请求头，指定发送的数据为 JSON 格式
       },
@@ -82,7 +82,7 @@ export default {
 
   saveDetectResultFile(uploadFileParamsDto) {
     return request({
-      url: 'http://localhost:8120/admin/contract/media-files/savemediainfo',
+      url: 'minio/savemediainfo',
       method: 'post',
       timeout: 15000, // 设置超时时间为15000毫秒（15秒）
       headers: {
@@ -100,7 +100,7 @@ export default {
       item.resultId = detectFileId;
     });
     return request({
-      url: `admin/contract/detect-result/save/${id}`,
+      url: `/contract/detect-result/save/${id}`,
       method: 'post',
       data: DetectResultList
     })
@@ -109,10 +109,18 @@ export default {
 
   detectResPageList(pageNo, pageSize, queryDetectResultDto) {
     return request({
-      url:  `admin/contract/detect-result/listpage/${pageNo}/${pageSize}`,
+      url:  `/contract/detect-result/listpage/${pageNo}/${pageSize}`,
       method: 'get',
       params: queryDetectResultDto
     })
   },
+
+  removeDetectRecordAndFile(id) {
+    return request({
+      url:  `/contract/detect-result/delete/${id}`,
+      method: 'delete',
+    })
+  },
+
 
 }
